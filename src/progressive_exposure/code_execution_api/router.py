@@ -1,7 +1,11 @@
+import logging
+
 from fastapi import APIRouter, HTTPException
 
 from .js_script_runner import MAX_CODE_SIZE, js_script_runner
 from .models import CodeExecutionRequest, CodeExecutionResponse
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["Code Execution"])
 
@@ -19,6 +23,8 @@ def execute_code(request: CodeExecutionRequest) -> CodeExecutionResponse:
             status_code=400,
             detail=f"Code exceeds maximum size of {MAX_CODE_SIZE} bytes.",
         )
+
+    logger.info("--- Received JavaScript code ---\n%s\n--- End of code ---", code)
 
     output, exit_code, timed_out = js_script_runner(code)
 
