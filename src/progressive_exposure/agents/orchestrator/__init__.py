@@ -7,6 +7,7 @@ import azure.identity
 from progressive_exposure.agents.orchestrator import orchestrator_agent
 from . import subprocess_inline_script_runner
 from . import subprocess_file_script_runner
+from . import remote_script_runner
 
 logger = logging.getLogger(__name__)
 
@@ -59,9 +60,91 @@ def execute_code(code: str) -> str:
     return subprocess_inline_script_runner.inline_script_runner(code)
 
 
+# Discover plugins from the orchestrator 'plugins' directory
+plugins_dir = Path(__file__).parent / "plugins"
+plugin_files = sorted(plugins_dir.glob("*.md"))
+if plugin_files:
+    logger.info("Discovered %d plugin(s) in %s", len(plugin_files), plugins_dir)
+    plugin_docs = "\n\n".join(f.read_text() for f in plugin_files)
+else:
+    logger.warning("No plugins found in %s", plugins_dir)
+    plugin_docs = "(No plugins available)"
+
+_JS_SKILL_CONTENT = f"""
+# Run JavaScript Code (Remote)
+
+## When to use this skill
+Use this skill when the user needs to:
+- Execute JavaScript code for calculations, data processing, or logic
+- Prototype a JavaScript snippet or validate JS-based logic
+- Perform tasks that specifically require JavaScript (e.g., JSON manipulation, regex, string operations)
+- Any task where JavaScript is preferred over Python
+
+## Usage
+Run the `execute` script with the `code` parameter containing the JavaScript source code.
+The code is sent to a remote execution service running QuickJS.
+
+## Code Guidelines — QuickJS Compliance
+All generated code MUST be QuickJS-compliant. QuickJS supports ES2023 syntax but is NOT Node.js.
+
+### Supported
+- `console.log()` to produce output
+- `const` and `let` for variable declarations
+- Arrow functions, template literals, destructuring, spread/rest operators
+- `async`/`await` and Promises
+- Standard built-in objects: `JSON`, `Math`, `Date`, `RegExp`, `Map`, `Set`, `Array`, `Object`, `String`, `Number`, `BigInt`, `Symbol`, `Proxy`, `Reflect`
+- `for...of`, `for...in`, generators, iterators
+- Classes, optional chaining (`?.`), nullish coalescing (`??`)
+- Plugins provided by the remote API via `import * as <name> from '<name>'` (see Plugins section below)
+
+### NOT Supported (do NOT use)
+- `require()` — use `import * as <name> from '<name>'` for plugins only
+- Node.js built-in modules (`fs`, `path`, `http`, `https`, `crypto`, `url`, `child_process`, etc.)
+- Browser `fetch()`, `XMLHttpRequest`, or any other network APIs
+- Browser APIs (`document`, `window`, `alert`, `setTimeout`, `setInterval`, etc.)
+- `Buffer`, `process`, `__dirname`, `__filename`
+- npm packages of any kind
+- `import` of arbitrary modules — only plugin modules provided by the remote API are available
+
+## Plugins
+
+The remote QuickJS environment provides dependency-injected plugins for functionality not natively available.
+Import them using ES module syntax: `import * as <name> from '<name>'`
+
+{plugin_docs}
+
+## Limitations
+- Maximum code size: 10 KB
+- Execution timeout: 60 seconds
+- No access to environment variables or secrets
+- Output is truncated at 50,000 characters
+- No external modules or packages — only ECMAScript built-ins and remote API plugins
+"""
+
+run_js_remote_skill = agent_framework.Skill(
+    name="run-javascript-code-remote",
+    description=(
+        "Sends dynamically generated JavaScript code to a remote execution service and returns the output. "
+        "Use this skill when the user asks to perform tasks using JavaScript, such as data transformations, "
+        "string manipulation, algorithmic problem-solving, JSON processing, or any task that benefits from "
+        "precise programmatic computation using JavaScript rather than Python. "
+        "The code runs in a remote QuickJS environment. All generated code must be QuickJS-compliant."
+    ),
+    content=_JS_SKILL_CONTENT,
+)
+
+
+@run_js_remote_skill.script(
+    name="execute",
+    description="Execute JavaScript code remotely and return the output.",
+)
+def execute_js_code(code: str) -> str:
+    return remote_script_runner.remote_script_runner(code)
+
+
 skills_provider = agent_framework._skills.SkillsProvider(
     skill_paths=skills_dir,
-    skills=[run_code_skill],
+    skills=[run_code_skill, run_js_remote_skill],
     script_runner=subprocess_file_script_runner.subprocess_script_runner,
 )
 
