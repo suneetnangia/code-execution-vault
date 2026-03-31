@@ -3,8 +3,8 @@ name: risk-analysis-composed
 description: >
   Performs risk analysis on a portfolio by chaining Financial Data APIs (Stock Quotes, Portfolio Holdings, Market Indices).
   Use when the user asks about portfolio risk exposure, holdings sensitivity to market moves, unrealized P&L benchmarking,
-  or identifying correlated risk across positions. This skill instructs you to generate Python code that calls the
-  financial APIs and computes risk metrics, then execute it using the run-python-code skill.
+  or identifying correlated risk across positions. This skill instructs you to generate code that calls the
+  financial APIs and computes risk metrics, then execute it using either the run-python-code skill or the javascript-code skill.
   Requires the financial APIs to be running at http://localhost:8000.
 metadata:
   author: progressive-exposure
@@ -32,8 +32,12 @@ Use this skill when the user needs to:
 ## How it works
 
 When this skill is triggered, you MUST:
-1. Generate Python code that chains the Financial Data APIs documented below
-2. Execute that code using the `run-python-code` skill (via its `execute` script with the `code` parameter)
+1. Generate code that chains the Financial Data APIs documented below — either **Python** or **JavaScript** (QuickJS-compliant)
+2. Execute that code using either:
+   - The `run-python-code` skill (via its `execute` script with the `code` parameter) for Python, OR
+   - The `javascript-code` skill (via its `scripts/run_js.py` script with the `--code` parameter) for JavaScript
+
+Choose the language based on user preference. If the user does not specify, either language is acceptable.
 
 Do NOT answer from general knowledge. Always call the live APIs to get current data.
 
@@ -115,16 +119,19 @@ Use these mappings when comparing holdings to their benchmark index:
 
 ## Code Generation Guidelines
 
+Generate code in **either Python or JavaScript**. Use `http://localhost:8000` as the base URL for all API calls.
+
+### Python guidelines
+
 When generating Python code to execute via `run-python-code`:
 - Use only `urllib.request` and `json` from the standard library (no external packages)
-- Use `http://localhost:8000` as the base URL for all API calls
 - Set a 10-second timeout on requests
 - Handle HTTP errors gracefully (check response codes before parsing)
 - Format output as readable tables or summaries with aligned columns
 - Include both absolute and relative performance metrics
 - Sort results by risk exposure (most exposed first)
 
-### Helper pattern for API calls
+#### Helper pattern (Python)
 
 ```python
 import json
@@ -136,6 +143,33 @@ def api_get(path):
     req = urllib.request.Request(f"{BASE_URL}{path}")
     with urllib.request.urlopen(req, timeout=10) as resp:
         return json.loads(resp.read().decode())
+```
+
+### JavaScript guidelines (QuickJS-compliant)
+
+When generating JavaScript code to execute via `javascript-code`:
+- Code must be QuickJS-compliant (no Node.js or browser APIs)
+- Use the built-in `fetch` module for HTTP requests (see helper pattern below)
+- Format output as readable tables or summaries
+- Use `console.log()` for output
+- Sort results by risk exposure (most exposed first)
+
+#### Helper pattern (JavaScript)
+
+For any external API call, use the built-in `fetch` module with this pattern:
+
+```javascript
+import * as fetch from "fetch";
+function handler(e) { return { result: fetch.fetch(e) }; }
+
+const BASE_URL = "http://localhost:8000";
+
+function apiGet(path) {
+  const response = handler(BASE_URL + path);
+  return JSON.parse(response.result);
+}
+
+export { handler };
 ```
 
 ## Analysis Patterns

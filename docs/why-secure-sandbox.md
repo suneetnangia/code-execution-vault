@@ -30,9 +30,9 @@ This repository uses the subprocess approach with [Microsoft Agent Framework](ht
 
 | Topic | Link |
 |---|---|
-| OWASP Top 10 for LLM Applications | https://owasp.org/www-project-top-10-for-large-language-model-applications/ |
-| OpenAI Code Interpreter | https://developers.openai.com/api/docs/guides/tools-code-interpreter |
-| Cloudflare V8 Isolates | https://developers.cloudflare.com/workers/reference/how-workers-works/ |
-| Cloudflare Bindings Model | https://blog.cloudflare.com/workers-environment-live-object-bindings/ |
-| Azure AI Foundry Code Interpreter | https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/tools/code-interpreter |
-| Azure Container Apps Dynamic Sessions | https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter |
+| OWASP Top 10 for LLM Applications | <https://owasp.org/www-project-top-10-for-large-language-model-applications/> |
+| OpenAI Code Interpreter | <https://developers.openai.com/api/docs/guides/tools-code-interpreter> |
+| Cloudflare V8 Isolates | <https://developers.cloudflare.com/workers/reference/how-workers-works/> |
+| Cloudflare Bindings Model | <https://blog.cloudflare.com/workers-environment-live-object-bindings/> |
+| Azure AI Foundry Code Interpreter | <https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/tools/code-interpreter> |
+| Azure Container Apps Dynamic Sessions | <https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter> |

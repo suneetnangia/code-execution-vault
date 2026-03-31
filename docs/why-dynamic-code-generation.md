@@ -61,8 +61,8 @@ In the risk analysis example above, the generated code calls `api.get_portfolio(
 
 | Topic | Link |
 |---|---|
-| Azure AI Foundry Code Interpreter | https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/tools/code-interpreter |
+| Azure AI Foundry Code Interpreter | <https://learn.microsoft.com/en-us/azure/foundry/agents/how-to/tools/code-interpreter> |
 | Cloudflare Code Mode Blog | <https://blog.cloudflare.com/code-mode/> |
 | Cloudflare Code Mode MCP | <https://blog.cloudflare.com/code-mode-mcp/> |
-| Claude Programmatic Tool Calling | https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling |
+| Claude Programmatic Tool Calling | <https://platform.claude.com/docs/en/agents-and-tools/tool-use/programmatic-tool-calling> |
 | OpenAI Code Interpreter | <https://developers.openai.com/api/docs/guides/tools-code-interpreter> |

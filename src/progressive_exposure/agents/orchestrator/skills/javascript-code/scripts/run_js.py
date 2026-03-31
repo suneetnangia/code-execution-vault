@@ -15,7 +15,6 @@ import sys
 import urllib.request
 import urllib.error
 
-# TODO: Update this URL once the remote JavaScript execution API is built.
 API_URL = "http://localhost:3000/api/execute"
 
 REQUEST_TIMEOUT = 30  # seconds

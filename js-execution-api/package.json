@@ -1,0 +1,9 @@
+{
+  "name": "js-execution-api",
+  "version": "1.0.0",
+  "description": "Simple API to execute JavaScript code in an isolated subprocess.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}
