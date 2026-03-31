@@ -28,7 +28,7 @@ def remote_script_runner(code: str) -> str:
         The execution output, or an error message.
     """
     base_url = os.environ.get("REMOTE_CODE_EXECUTION_URL", DEFAULT_API_URL)
-    url = f"{base_url}/api/v1/execute"
+    url = f"{base_url}/execute"
 
     payload = json.dumps({"code": code}).encode("utf-8")
     req = urllib.request.Request(

@@ -7,7 +7,7 @@ from .models import CodeExecutionRequest, CodeExecutionResponse
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/v1", tags=["Code Execution"])
+router = APIRouter(tags=["Code Execution"])
 
 
 @router.post("/execute", response_model=CodeExecutionResponse)

@@ -33,7 +33,7 @@ class TestRemoteScriptRunner:
         # Verify the request was made correctly
         call_args = mock_urlopen.call_args
         req = call_args[0][0]
-        assert req.full_url == f"{DEFAULT_API_URL}/api/v1/execute"
+        assert req.full_url == f"{DEFAULT_API_URL}/execute"
         assert req.method == "POST"
         assert json.loads(req.data) == {"code": 'console.log("hello")'}
 
@@ -47,7 +47,7 @@ class TestRemoteScriptRunner:
     def test_http_error_with_detail(self, mock_urlopen: MagicMock) -> None:
         error_body = json.dumps({"detail": "No code provided."}).encode("utf-8")
         http_error = urllib.error.HTTPError(
-            url=f"{DEFAULT_API_URL}/api/v1/execute",
+            url=f"{DEFAULT_API_URL}/execute",
             code=400,
             msg="Bad Request",
             hdrs=None,  # type: ignore[arg-type]
@@ -82,4 +82,4 @@ class TestRemoteScriptRunner:
         assert result == "ok"
 
         req = mock_urlopen.call_args[0][0]
-        assert req.full_url == "http://custom-host:9999/api/v1/execute"
+        assert req.full_url == "http://custom-host:9999/execute"

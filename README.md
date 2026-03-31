@@ -136,7 +136,7 @@ uv run code-execution-api
 
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | `/api/v1/execute` | Execute JavaScript code remotely |
+| POST | `/execute` | Execute JavaScript code remotely |
 
 **Request:**
 ```json
