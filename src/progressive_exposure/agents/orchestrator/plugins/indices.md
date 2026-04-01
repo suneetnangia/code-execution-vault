@@ -26,16 +26,21 @@ Returns a single market index by symbol as a JSON string.
 ```javascript
 import * as indices from 'indices';
 
-// Get all indices
-const allIndices = JSON.parse(indices.get());
-console.log(allIndices);
+function handler(e) {
+  // Get all indices
+  const allRaw = indices.get();
+  const allIndices = allRaw !== null ? JSON.parse(allRaw) : null;
 
-// Get a single index (check for null)
-const nasdaqRaw = indices.get("IXIC");
-if (nasdaqRaw !== null) {
-  const nasdaq = JSON.parse(nasdaqRaw);
-  console.log(nasdaq.change_percent);
+  // Get a single index (check for null)
+  const nasdaqRaw = indices.get("IXIC");
+  if (nasdaqRaw !== null) {
+    const nasdaq = JSON.parse(nasdaqRaw);
+    return { result: nasdaq.change_percent };
+  }
+  return { result: null };
 }
+
+export { handler };
 ```
 
 ## Notes

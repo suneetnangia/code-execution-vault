@@ -109,11 +109,37 @@ if (allIndicesRaw !== null) {{
 You MUST use the plugin imports above to retrieve data.
 All plugin `.get()` methods return `null` when no results are found — always check before calling `JSON.parse()`.
 
+## CRITICAL — Handler Function Format
+All generated code MUST be wrapped in a `handler` function that is exported. The remote execution
+environment calls this function at runtime. Code that is not wrapped in a handler will fail.
+
+**Required structure:**
+```javascript
+import * as indices from 'indices';
+
+function handler(e) {{
+  const raw = indices.get("DJI");
+  if (raw !== null) {{
+    return {{ result: JSON.parse(raw) }};
+  }}
+  return {{ result: null }};
+}}
+
+export {{ handler }};
+```
+
+Rules:
+- ALL imports go at the top of the file, before the handler function
+- ALL logic MUST be inside the `handler(e)` function
+- The handler MUST be exported via `export {{ handler }};` as the last line
+- Do NOT place any executable code outside the handler function
+- Do NOT use `console.log()` for output — return data from the handler instead
+
 ## Code Guidelines — QuickJS Compliance
 All generated code MUST be QuickJS-compliant. QuickJS supports ES2023 syntax but is NOT Node.js.
 
 ### Supported
-- `console.log()` to produce output
+- `function handler(e) {{ ... }}` with `export {{ handler }};` — required structure for all code
 - `const` and `let` for variable declarations
 - Arrow functions, template literals, destructuring, spread/rest operators
 - `async`/`await` and Promises

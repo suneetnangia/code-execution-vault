@@ -18,12 +18,16 @@ Returns all portfolio holdings with summary as a JSON string.
 ```javascript
 import * as portfolios from 'portfolios';
 
-const raw = portfolios.get();
-if (raw !== null) {
-  const portfolio = JSON.parse(raw);
-  console.log(portfolio.summary.total_market_value);
-  portfolio.holdings.forEach(h => console.log(h.ticker, h.unrealized_pnl));
+function handler(e) {
+  const raw = portfolios.get();
+  if (raw !== null) {
+    const portfolio = JSON.parse(raw);
+    return { result: portfolio.summary.total_market_value };
+  }
+  return { result: null };
 }
+
+export { handler };
 ```
 
 ## Notes

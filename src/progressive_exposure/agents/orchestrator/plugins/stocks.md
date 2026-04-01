@@ -26,16 +26,21 @@ Returns a single stock quote by ticker as a JSON string.
 ```javascript
 import * as stocks from 'stocks';
 
-// Get all stocks
-const allStocks = JSON.parse(stocks.get());
-console.log(allStocks);
+function handler(e) {
+  // Get all stocks
+  const allRaw = stocks.get();
+  const allStocks = allRaw !== null ? JSON.parse(allRaw) : null;
 
-// Get a single stock (check for null)
-const appleRaw = stocks.get("AAPL");
-if (appleRaw !== null) {
-  const apple = JSON.parse(appleRaw);
-  console.log(apple.price);
+  // Get a single stock (check for null)
+  const appleRaw = stocks.get("AAPL");
+  if (appleRaw !== null) {
+    const apple = JSON.parse(appleRaw);
+    return { result: apple.price };
+  }
+  return { result: null };
 }
+
+export { handler };
 ```
 
 ## Notes

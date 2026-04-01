@@ -3,10 +3,11 @@ name: risk-analysis-decomposed
 description: >
   Performs risk analysis on a portfolio by calling Financial Data APIs one at a time in separate steps.
   Use when the user asks about portfolio risk exposure, holdings sensitivity to market moves, unrealized P&L
-  benchmarking, or identifying correlated risk across positions. Unlike risk-analysis-composed, this skill makes each
+  benchmarking, or identifying correlated risk across positions. All portfolio, stock, and index data is available
+  through live APIs — never ask the user to provide this data. Unlike risk-analysis-composed, this skill makes each
   API call as a separate code execution invocation, allowing the model to reason over intermediate results
   before deciding the next call. Uses either run-python-code (Python) or run-javascript-code-remote (JavaScript)
-  depending on user request. Defaults to Python. Requires the financial APIs to be running at http://localhost:8000.
+  depending on user request. Defaults to Python.
 metadata:
   author: progressive-exposure
   version: "1.0"
@@ -41,6 +42,8 @@ Then, you MUST call the Financial Data APIs **one at a time**, each as a separat
 Do NOT chain all API calls in a single code block. Each step should be a separate execution.
 
 Do NOT answer from general knowledge. Always call the live APIs to get current data.
+
+Do NOT ask the user for portfolio holdings, stock data, or index data. All data is available through the APIs and plugins below. When the user says "our holdings" or "our portfolio", retrieve it from the Portfolio Holdings API — do not ask clarifying questions.
 
 ### Step-by-step workflow
 
@@ -161,7 +164,8 @@ After collecting all data from previous steps, write a final `run-python-code` i
 
 - All code MUST be QuickJS-compliant — see the `run-javascript-code-remote` skill for full guidelines and available plugins
 - **There is no `fetch()`, no HTTP, no URLs.** Use the `indices`, `stocks`, and `portfolios` plugins to access data
-- Use `console.log()` for output
+- All code MUST be wrapped in a `handler(e)` function and exported via `export { handler };`
+- Return results from the handler — do NOT use `console.log()` for output
 
 #### Template for each data access step
 
@@ -169,30 +173,45 @@ After collecting all data from previous steps, write a final `run-python-code` i
 
 ```javascript
 import * as indices from 'indices';
-const raw = indices.get();
-if (raw !== null) {
-  const data = JSON.parse(raw);
-  console.log(JSON.stringify(data, null, 2));
+
+function handler(e) {
+  const raw = indices.get();
+  if (raw !== null) {
+    return { result: JSON.parse(raw) };
+  }
+  return { result: null };
 }
+
+export { handler };
 ```
 
 Other plugins follow the same pattern:
 ```javascript
 import * as stocks from 'stocks';
-const raw = stocks.get("AAPL");
-if (raw !== null) {
-  const stock = JSON.parse(raw);
-  console.log(JSON.stringify(stock, null, 2));
+
+function handler(e) {
+  const raw = stocks.get("AAPL");
+  if (raw !== null) {
+    return { result: JSON.parse(raw) };
+  }
+  return { result: null };
 }
+
+export { handler };
 ```
 
 ```javascript
 import * as portfolios from 'portfolios';
-const raw = portfolios.get();
-if (raw !== null) {
-  const portfolio = JSON.parse(raw);
-  console.log(JSON.stringify(portfolio, null, 2));
+
+function handler(e) {
+  const raw = portfolios.get();
+  if (raw !== null) {
+    return { result: JSON.parse(raw) };
+  }
+  return { result: null };
 }
+
+export { handler };
 ```
 
 #### Template for final computation step
@@ -200,7 +219,7 @@ if (raw !== null) {
 After collecting all data from previous steps, write a final `run-javascript-code-remote` invocation that:
 - Hardcodes the collected data as JavaScript objects/arrays (copy from previous step outputs)
 - Computes the risk metrics (relative performance, exposure ranking, etc.)
-- Formats and prints a readable table or summary via `console.log()`
+- Returns a formatted result object from the handler function
 
 ## Analysis Patterns
 

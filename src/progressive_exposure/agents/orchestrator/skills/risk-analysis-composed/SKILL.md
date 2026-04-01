@@ -3,10 +3,10 @@ name: risk-analysis-composed
 description: >
   Performs risk analysis on a portfolio by chaining Financial Data APIs (Stock Quotes, Portfolio Holdings, Market Indices).
   Use when the user asks about portfolio risk exposure, holdings sensitivity to market moves, unrealized P&L benchmarking,
-  or identifying correlated risk across positions. This skill instructs you to generate code that calls the financial APIs
+  or identifying correlated risk across positions. All portfolio, stock, and index data is available through live APIs —
+  never ask the user to provide this data. This skill instructs you to generate code that calls the financial APIs
   and computes risk metrics, then execute it using either the run-python-code skill (Python) or run-javascript-code-remote
   skill (JavaScript), depending on what the user requests. Defaults to Python if the user does not specify.
-  Requires the financial APIs to be running at http://localhost:8000.
 metadata:
   author: progressive-exposure
   version: "1.0"
@@ -40,6 +40,8 @@ When this skill is triggered, you MUST:
 3. Execute that code using the appropriate skill (via its `execute` script with the `code` parameter)
 
 Do NOT answer from general knowledge. Always call the live APIs to get current data.
+
+Do NOT ask the user for portfolio holdings, stock data, or index data. All data is available through the APIs and plugins below. When the user says "our holdings" or "our portfolio", retrieve it from the Portfolio Holdings API — do not ask clarifying questions.
 
 ## Available Financial Data APIs
 
@@ -149,7 +151,8 @@ def api_get(path):
 
 - All code MUST be QuickJS-compliant — see the `run-javascript-code-remote` skill for full guidelines and available plugins
 - **There is no `fetch()`, no HTTP, no URLs.** Use the `indices`, `stocks`, and `portfolios` plugins to access data
-- Use `console.log()` for output
+- All code MUST be wrapped in a `handler(e)` function and exported via `export { handler };`
+- Return results from the handler — do NOT use `console.log()` for output
 
 #### Data access pattern
 
@@ -160,16 +163,23 @@ import * as indices from 'indices';
 import * as stocks from 'stocks';
 import * as portfolios from 'portfolios';
 
-const allIndicesRaw = indices.get();                  // string | null
-const nasdaqRaw = indices.get("IXIC");                // string | null
-const allStocksRaw = stocks.get();                    // string | null
-const appleRaw = stocks.get("AAPL");                  // string | null
-const portfolioRaw = portfolios.get();                // string | null
+function handler(e) {
+  const allIndicesRaw = indices.get();                  // string | null
+  const nasdaqRaw = indices.get("IXIC");                // string | null
+  const allStocksRaw = stocks.get();                    // string | null
+  const appleRaw = stocks.get("AAPL");                  // string | null
+  const portfolioRaw = portfolios.get();                // string | null
 
-// Always check for null before parsing
-if (allIndicesRaw !== null) {
-  const allIndices = JSON.parse(allIndicesRaw);
+  // Always check for null before parsing
+  const allIndices = allIndicesRaw !== null ? JSON.parse(allIndicesRaw) : null;
+  const portfolio = portfolioRaw !== null ? JSON.parse(portfolioRaw) : null;
+
+  // ... compute risk metrics ...
+
+  return { result: { /* analysis output */ } };
 }
+
+export { handler };
 ```
 
 ## Analysis Patterns
