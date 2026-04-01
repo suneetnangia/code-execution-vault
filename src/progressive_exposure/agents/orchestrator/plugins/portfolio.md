@@ -1,15 +1,15 @@
-# portfolios
+# portfolio
 
 Provides access to portfolio holdings data in the remote QuickJS environment.
 
 ## Import
 ```javascript
-import * as portfolios from "portfolios";
+import * as portfolio from "portfolio";
 ```
 
 ## Functions
 
-### `portfolios.get()`
+### `portfolio.get()`
 Returns all portfolio holdings with summary.
 
 **Returns:** Object | null — Object containing `summary` and `holdings` array, or `null` if no data is available
@@ -20,12 +20,12 @@ Each holding in the `holdings` array has: `ticker` (string), `name` (string), `q
 
 ## Example
 ```javascript
-import * as portfolios from "portfolios";
+import * as portfolio from "portfolio";
 
 function handler(e) {
-  const portfolio = portfolios.get();
-  if (portfolio !== null) {
-    return portfolio.summary.total_market_value;
+  const data = portfolio.get();
+  if (data !== null) {
+    return data.summary.total_market_value;
   }
   return null;
 }

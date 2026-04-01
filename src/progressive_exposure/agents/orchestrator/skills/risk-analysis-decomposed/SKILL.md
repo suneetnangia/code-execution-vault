@@ -163,7 +163,7 @@ After collecting all data from previous steps, write a final `run-python-code` i
 ### JavaScript (when using `run-javascript-code-remote`)
 
 - All code MUST be QuickJS-compliant — see the `run-javascript-code-remote` skill for full guidelines and available plugins
-- **There is no `fetch()`, no HTTP, no URLs.** Use the `indices`, `stocks`, and `portfolios` plugins to access data
+- **There is no `fetch()`, no HTTP, no URLs.** Use the `indices`, `stocks`, and `portfolio` plugins to access data
 - All code MUST be wrapped in a `handler(e)` function and exported via `export { handler };`
 - Return results from the handler — do NOT use `console.log()` for output
 
@@ -201,12 +201,12 @@ export { handler };
 ```
 
 ```javascript
-import * as portfolios from "portfolios";
+import * as portfolio from "portfolio";
 
 function handler(e) {
-  const portfolio = portfolios.get();
-  if (portfolio !== null) {
-    return portfolio;
+  const data = portfolio.get();
+  if (data !== null) {
+    return data;
   }
   return null;
 }

@@ -197,7 +197,7 @@ Plugin documentation lives in `src/progressive_exposure/agents/orchestrator/plug
 |--------|--------|-------------|
 | `indices` | `import * as indices from "indices"` | Market index data via `indices.get()` / `indices.get(symbol)` |
 | `stocks` | `import * as stocks from "stocks"` | Stock quote data via `stocks.get()` / `stocks.get(ticker)` |
-| `portfolios` | `import * as portfolios from "portfolios"` | Portfolio holdings via `portfolios.get()` |
+| `portfolio` | `import * as portfolio from "portfolio"` | Portfolio holdings via `portfolio.get()` |
 
 #### Adding a new plugin
 

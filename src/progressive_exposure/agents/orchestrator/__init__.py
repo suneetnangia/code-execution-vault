@@ -91,13 +91,13 @@ To access financial data, you MUST use the provided plugins:
 ```javascript
 import * as indices from "indices";
 import * as stocks from "stocks";
-import * as portfolios from "portfolios";
+import * as portfolio from "portfolio";
 
 const allIndices = indices.get();                     // Array | null
 const nasdaq = indices.get("IXIC");                   // Object | null
 const allStocks = stocks.get();                       // Array | null
 const apple = stocks.get("AAPL");                     // Object | null
-const portfolio = portfolios.get();                   // Object | null
+const portfolioData = portfolio.get();                // Object | null
 
 // Always check for null before accessing properties
 if (nasdaq !== null) {{
@@ -151,7 +151,7 @@ All generated code MUST be QuickJS-compliant. QuickJS supports ES2023 syntax but
 - Plugins provided by the remote API via `import * as <name> from "<name>"` (see Plugins section below)
 
 ### NOT Supported (do NOT use)
-- **`fetch()` — does NOT exist.** Use the `indices`, `stocks`, and `portfolios` plugins instead
+- **`fetch()` — does NOT exist.** Use the `indices`, `stocks`, and `portfolio` plugins instead
 - `require()` — use `import * as <name> from "<name>"` for plugins only
 - Node.js built-in modules (`fs`, `path`, `http`, `https`, `crypto`, `url`, `child_process`, etc.)
 - `XMLHttpRequest` or any other network APIs

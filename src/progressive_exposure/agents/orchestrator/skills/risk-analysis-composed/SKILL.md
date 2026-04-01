@@ -150,7 +150,7 @@ def api_get(path):
 ### JavaScript (when using `run-javascript-code-remote`)
 
 - All code MUST be QuickJS-compliant — see the `run-javascript-code-remote` skill for full guidelines and available plugins
-- **There is no `fetch()`, no HTTP, no URLs.** Use the `indices`, `stocks`, and `portfolios` plugins to access data
+- **There is no `fetch()`, no HTTP, no URLs.** Use the `indices`, `stocks`, and `portfolio` plugins to access data
 - All code MUST be wrapped in a `handler(e)` function and exported via `export { handler };`
 - Return results from the handler — do NOT use `console.log()` for output
 
@@ -161,14 +161,14 @@ def api_get(path):
 ```javascript
 import * as indices from "indices";
 import * as stocks from "stocks";
-import * as portfolios from "portfolios";
+import * as portfolio from "portfolio";
 
 function handler(e) {
   const allIndices = indices.get();                     // Array | null
   const nasdaq = indices.get("IXIC");                   // Object | null
   const allStocks = stocks.get();                       // Array | null
   const apple = stocks.get("AAPL");                     // Object | null
-  const portfolio = portfolios.get();                   // Object | null
+  const portfolioData = portfolio.get();                // Object | null
 
   // Always check for null before accessing properties
 
