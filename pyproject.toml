@@ -25,6 +25,7 @@ dev = [
 [project.scripts]
 progressive-exposure = "progressive_exposure:cli"
 financial-apis = "progressive_exposure.financial_apis.app:main"
+code-execution-api = "progressive_exposure.code_execution_api.app:main"
 
 [tool.pyright]
 pythonVersion = "3.13"

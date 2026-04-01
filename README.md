@@ -2,9 +2,9 @@
 
 Demonstrates progressive exposure techniques for LLMs by combining Skills with dynamic code generation, built on the [Microsoft Agent Framework](https://github.com/microsoft/agent-framework).
 
-An orchestrator agent delegates tasks to skills: fetching web pages, running dynamically generated Python code, and performing portfolio risk analysis by chaining multiple Financial Data APIs.
+An orchestrator agent delegates tasks to skills: fetching web pages, running dynamically generated Python or JavaScript code, and performing portfolio risk analysis by chaining multiple Financial Data APIs.
 
-The project includes **mock Financial Data APIs** and two **risk analysis skills** (composed and decomposed) that demonstrate how an LLM agent can chain API calls with different execution strategies.
+The project includes **mock Financial Data APIs**, a **Code Execution API** for remote JavaScript execution, and two **risk analysis skills** (composed and decomposed) that demonstrate how an LLM agent can chain API calls with different execution strategies.
 
 ## Why Dynamic Code Generation?
 
@@ -37,7 +37,10 @@ Edit `src/progressive_exposure/agents/.env`:
 ```env
 AZURE_OPENAI_ENDPOINT=https://<your-resource>.cognitiveservices.azure.com
 AZURE_OPENAI_DEPLOYMENT_NAME=<your-deployment-name>
+REMOTE_CODE_EXECUTION_URL=http://localhost:8100
 ```
+
+`REMOTE_CODE_EXECUTION_URL` defaults to `http://localhost:8100` and only needs to be changed when pointing at a remote execution service.
 
 ### Authenticate with Azure
 
@@ -116,6 +119,54 @@ uv run uvicorn progressive_exposure.financial_apis.indices_app:app --host 0.0.0.
 
 Swagger UI is available at `http://localhost:8000/docs`.
 
+## Code Execution API
+
+A PoC FastAPI stub that accepts JavaScript code, logs it to the console, and returns a fixed response. This serves as a stand-in for a real remote code execution service (e.g., a QuickJS sandbox).
+
+### Running
+
+```bash
+uv run uvicorn progressive_exposure.code_execution_api.app:app --host 0.0.0.0 --port 8100 --reload
+```
+
+Or via the project script:
+
+```bash
+uv run code-execution-api
+```
+
+### Endpoint
+
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | `/execute` | Execute JavaScript code remotely |
+
+**Request:**
+```json
+{
+  "code": "console.log('hello')"
+}
+```
+
+**Response:**
+```json
+{
+  "output": "Code received and logged successfully.",
+  "exit_code": 0,
+  "timed_out": false
+}
+```
+
+Swagger UI is available at `http://localhost:8100/docs`.
+
+### Configuration
+
+The `run-javascript-code-remote` skill sends code to this API. The URL is controlled by the `REMOTE_CODE_EXECUTION_URL` environment variable (defaults to `http://localhost:8100`). To point at a real remote execution service, set:
+
+```env
+REMOTE_CODE_EXECUTION_URL=https://your-remote-service.example.com
+```
+
 ## Skills
 
 ### read-web-page
@@ -129,6 +180,61 @@ Performs portfolio risk analysis by generating Python code that **chains all 3 F
 ### risk-analysis-decomposed
 
 Performs the same risk analysis but **calls each API separately** in individual `run-python-code` invocations. The agent examines each response before deciding the next call, enabling step-by-step reasoning over intermediate results.
+
+### run-javascript-code-remote
+
+Sends dynamically generated JavaScript code to a remote execution service (the Code Execution API) and returns the output. All generated code must be **QuickJS-compliant** (ES2023 syntax, standard built-in objects only). Use `console.log()` for output. Functionality not natively available in QuickJS (e.g., HTTP requests) is provided via **plugins** — see below.
+
+### QuickJS Plugins
+
+The remote QuickJS environment provides dependency-injected plugins for functionality not natively available. Plugins are imported using ES module syntax (`import * as <name> from "<name>"`).
+
+Plugin documentation lives in `src/progressive_exposure/agents/orchestrator/plugins/` as individual `.md` files. At startup, all plugin docs are automatically loaded and included in the `run-javascript-code-remote` skill content sent to the LLM.
+
+**Current plugins:**
+
+| Plugin | Import | Description |
+|--------|--------|-------------|
+| `indices` | `import * as indices from "indices"` | Market index data via `indices.get()` / `indices.get(symbol)` |
+| `stocks` | `import * as stocks from "stocks"` | Stock quote data via `stocks.get()` / `stocks.get(ticker)` |
+| `portfolio` | `import * as portfolio from "portfolio"` | Portfolio holdings via `portfolio.get()` |
+
+#### Adding a new plugin
+
+1. Create a new `.md` file in `src/progressive_exposure/agents/orchestrator/plugins/` (e.g., `crypto.md`)
+2. Follow the standard template:
+
+   ```markdown
+   # <plugin-name>
+
+   <Brief description of what the plugin provides.>
+
+   ## Import
+   ```javascript
+   import * as <name> from "<name>";
+   ```
+
+   ## Functions
+
+   ### `<name>.<function>(args)`
+   <Description of what the function does.>
+
+   **Parameters:**
+   - `<arg>` (<type>) — <description>
+
+   **Returns:** <type> — <description>
+
+   ## Example
+   ```javascript
+   import * as <name> from "<name>";
+   // usage example
+   ```
+
+   ## Notes
+   - <Any important caveats or restrictions>
+   ```
+
+3. Restart the agent — the plugin docs are loaded automatically at startup. No changes to `__init__.py` or any SKILL.md files are needed.
 
 ### Persona & Example Prompts
 
@@ -151,3 +257,8 @@ poe typecheck       # Type check with pyright
 poe test            # Run tests with pytest
 poe check           # Run all of the above
 ```
+
+## Next Steps
+
+- **Scalable skill configuration** — Find a more robust way to provide configuration values (e.g., API base URLs, feature flags) to skill definitions at runtime, rather than relying on string substitution or hardcoded defaults scattered across SKILL.md files.
+- **Formal plugin specification** — Replace the current free-form Markdown plugin docs with a structured, machine-readable spec (similar to OpenAPI) that can be validated, versioned, and used to auto-generate the plugin documentation injected into skill content.

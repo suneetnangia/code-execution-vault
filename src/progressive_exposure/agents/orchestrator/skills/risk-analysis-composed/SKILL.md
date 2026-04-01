@@ -3,9 +3,10 @@ name: risk-analysis-composed
 description: >
   Performs risk analysis on a portfolio by chaining Financial Data APIs (Stock Quotes, Portfolio Holdings, Market Indices).
   Use when the user asks about portfolio risk exposure, holdings sensitivity to market moves, unrealized P&L benchmarking,
-  or identifying correlated risk across positions. This skill instructs you to generate Python code that calls the
-  financial APIs and computes risk metrics, then execute it using the run-python-code skill.
-  Requires the financial APIs to be running at http://localhost:8000.
+  or identifying correlated risk across positions. All portfolio, stock, and index data is available through live APIs —
+  never ask the user to provide this data. This skill instructs you to generate code that calls the financial APIs
+  and computes risk metrics, then execute it using either the run-python-code skill (Python) or run-javascript-code-remote
+  skill (JavaScript), depending on what the user requests. Defaults to Python if the user does not specify.
 metadata:
   author: progressive-exposure
   version: "1.0"
@@ -32,10 +33,15 @@ Use this skill when the user needs to:
 ## How it works
 
 When this skill is triggered, you MUST:
-1. Generate Python code that chains the Financial Data APIs documented below
-2. Execute that code using the `run-python-code` skill (via its `execute` script with the `code` parameter)
+1. Determine the execution language based on the user's request:
+   - If the user asks for **JavaScript** or **JS**: generate JavaScript code and execute it using the `run-javascript-code-remote` skill
+   - Otherwise (default): generate Python code and execute it using the `run-python-code` skill
+2. Generate code in the chosen language that chains the Financial Data APIs documented below
+3. Execute that code using the appropriate skill (via its `execute` script with the `code` parameter)
 
 Do NOT answer from general knowledge. Always call the live APIs to get current data.
+
+Do NOT ask the user for portfolio holdings, stock data, or index data. All data is available through the APIs and plugins below. When the user says "our holdings" or "our portfolio", retrieve it from the Portfolio Holdings API — do not ask clarifying questions.
 
 ## Available Financial Data APIs
 
@@ -115,8 +121,7 @@ Use these mappings when comparing holdings to their benchmark index:
 
 ## Code Generation Guidelines
 
-When generating Python code to execute via `run-python-code`:
-- Use only `urllib.request` and `json` from the standard library (no external packages)
+General guidelines (both languages):
 - Use `http://localhost:8000` as the base URL for all API calls
 - Set a 10-second timeout on requests
 - Handle HTTP errors gracefully (check response codes before parsing)
@@ -124,7 +129,11 @@ When generating Python code to execute via `run-python-code`:
 - Include both absolute and relative performance metrics
 - Sort results by risk exposure (most exposed first)
 
-### Helper pattern for API calls
+### Python (when using `run-python-code`)
+
+- Use only `urllib.request` and `json` from the standard library (no external packages)
+
+#### Helper pattern for API calls
 
 ```python
 import json
@@ -136,6 +145,39 @@ def api_get(path):
     req = urllib.request.Request(f"{BASE_URL}{path}")
     with urllib.request.urlopen(req, timeout=10) as resp:
         return json.loads(resp.read().decode())
+```
+
+### JavaScript (when using `run-javascript-code-remote`)
+
+- All code MUST be QuickJS-compliant — see the `run-javascript-code-remote` skill for full guidelines and available plugins
+- **There is no `fetch()`, no HTTP, no URLs.** Use the `indices`, `stocks`, and `portfolio` plugins to access data
+- All code MUST be wrapped in a `handler(e)` function and exported via `export { handler };`
+- Return results from the handler — do NOT use `console.log()` for output
+
+#### Data access pattern
+
+**You MUST use plugins to access data — there is no HTTP or URL-based API access in QuickJS:**
+
+```javascript
+import * as indices from "indices";
+import * as stocks from "stocks";
+import * as portfolio from "portfolio";
+
+function handler(e) {
+  const allIndices = indices.get();                     // Array | null
+  const nasdaq = indices.get("IXIC");                   // Object | null
+  const allStocks = stocks.get();                       // Array | null
+  const apple = stocks.get("AAPL");                     // Object | null
+  const portfolioData = portfolio.get();                // Object | null
+
+  // Always check for null before accessing properties
+
+  // ... compute risk metrics ...
+
+  return { /* analysis output */ };
+}
+
+export { handler };
 ```
 
 ## Analysis Patterns

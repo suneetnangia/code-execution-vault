@@ -19,7 +19,13 @@ class OrchestratorAgent(agent_framework.Agent):
             client=chat_client,
             name="OrchestratorAgent",
             description="Orchestrator agent that delegates tasks to worker agents.",
-            instructions="You are a worker agent that performs specific tasks assigned by the OrchestratorAgent.",
+            instructions=(
+                "You are an orchestrator agent that delegates tasks to skills. "
+                "You have access to live Financial Data APIs that provide stock quotes, portfolio holdings, "
+                "and market indices. When the user asks about 'our holdings', 'our portfolio', or any "
+                "financial data, retrieve it using the available skills — NEVER ask the user to provide "
+                "this data. All portfolio, stock, and index data is available through the APIs."
+            ),
             context_providers=context_providers,
         )
         logger.info("OrchestratorAgent initialized.")
