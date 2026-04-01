@@ -187,7 +187,7 @@ Sends dynamically generated JavaScript code to a remote execution service (the C
 
 ### QuickJS Plugins
 
-The remote QuickJS environment provides dependency-injected plugins for functionality not natively available. Plugins are imported using ES module syntax (`import * as <name> from '<name>'`).
+The remote QuickJS environment provides dependency-injected plugins for functionality not natively available. Plugins are imported using ES module syntax (`import * as <name> from "<name>"`).
 
 Plugin documentation lives in `src/progressive_exposure/agents/orchestrator/plugins/` as individual `.md` files. At startup, all plugin docs are automatically loaded and included in the `run-javascript-code-remote` skill content sent to the LLM.
 
@@ -195,9 +195,9 @@ Plugin documentation lives in `src/progressive_exposure/agents/orchestrator/plug
 
 | Plugin | Import | Description |
 |--------|--------|-------------|
-| `indices` | `import * as indices from 'indices'` | Market index data via `indices.get()` / `indices.get(symbol)` |
-| `stocks` | `import * as stocks from 'stocks'` | Stock quote data via `stocks.get()` / `stocks.get(ticker)` |
-| `portfolios` | `import * as portfolios from 'portfolios'` | Portfolio holdings via `portfolios.get()` |
+| `indices` | `import * as indices from "indices"` | Market index data via `indices.get()` / `indices.get(symbol)` |
+| `stocks` | `import * as stocks from "stocks"` | Stock quote data via `stocks.get()` / `stocks.get(ticker)` |
+| `portfolios` | `import * as portfolios from "portfolios"` | Portfolio holdings via `portfolios.get()` |
 
 #### Adding a new plugin
 
@@ -211,7 +211,7 @@ Plugin documentation lives in `src/progressive_exposure/agents/orchestrator/plug
 
    ## Import
    ```javascript
-   import * as <name> from '<name>';
+   import * as <name> from "<name>";
    ```
 
    ## Functions
@@ -226,7 +226,7 @@ Plugin documentation lives in `src/progressive_exposure/agents/orchestrator/plug
 
    ## Example
    ```javascript
-   import * as <name> from '<name>';
+   import * as <name> from "<name>";
    // usage example
    ```
 

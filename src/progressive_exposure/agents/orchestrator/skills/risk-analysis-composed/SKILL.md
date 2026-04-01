@@ -159,24 +159,22 @@ def api_get(path):
 **You MUST use plugins to access data — there is no HTTP or URL-based API access in QuickJS:**
 
 ```javascript
-import * as indices from 'indices';
-import * as stocks from 'stocks';
-import * as portfolios from 'portfolios';
+import * as indices from "indices";
+import * as stocks from "stocks";
+import * as portfolios from "portfolios";
 
 function handler(e) {
-  const allIndicesRaw = indices.get();                  // string | null
-  const nasdaqRaw = indices.get("IXIC");                // string | null
-  const allStocksRaw = stocks.get();                    // string | null
-  const appleRaw = stocks.get("AAPL");                  // string | null
-  const portfolioRaw = portfolios.get();                // string | null
+  const allIndices = indices.get();                     // Array | null
+  const nasdaq = indices.get("IXIC");                   // Object | null
+  const allStocks = stocks.get();                       // Array | null
+  const apple = stocks.get("AAPL");                     // Object | null
+  const portfolio = portfolios.get();                   // Object | null
 
-  // Always check for null before parsing
-  const allIndices = allIndicesRaw !== null ? JSON.parse(allIndicesRaw) : null;
-  const portfolio = portfolioRaw !== null ? JSON.parse(portfolioRaw) : null;
+  // Always check for null before accessing properties
 
   // ... compute risk metrics ...
 
-  return { result: { /* analysis output */ } };
+  return { /* analysis output */ };
 }
 
 export { handler };

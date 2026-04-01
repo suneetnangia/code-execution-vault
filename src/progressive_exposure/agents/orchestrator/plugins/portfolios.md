@@ -4,32 +4,35 @@ Provides access to portfolio holdings data in the remote QuickJS environment.
 
 ## Import
 ```javascript
-import * as portfolios from 'portfolios';
+import * as portfolios from "portfolios";
 ```
 
 ## Functions
 
 ### `portfolios.get()`
-Returns all portfolio holdings with summary as a JSON string.
+Returns all portfolio holdings with summary.
 
-**Returns:** string | null — JSON object containing `summary` and `holdings` array, or `null` if no data is available
+**Returns:** Object | null — Object containing `summary` and `holdings` array, or `null` if no data is available
+
+The `summary` object has: `total_market_value` (number), `total_unrealized_pnl` (number), `holdings_count` (number)
+
+Each holding in the `holdings` array has: `ticker` (string), `name` (string), `quantity` (number), `avg_cost` (number), `current_price` (number), `market_value` (number), `unrealized_pnl` (number), `sector` (string), `allocation_percent` (number)
 
 ## Example
 ```javascript
-import * as portfolios from 'portfolios';
+import * as portfolios from "portfolios";
 
 function handler(e) {
-  const raw = portfolios.get();
-  if (raw !== null) {
-    const portfolio = JSON.parse(raw);
-    return { result: portfolio.summary.total_market_value };
+  const portfolio = portfolios.get();
+  if (portfolio !== null) {
+    return portfolio.summary.total_market_value;
   }
-  return { result: null };
+  return null;
 }
 
 export { handler };
 ```
 
 ## Notes
-- Returns `null` when no results are found — always check before calling `JSON.parse()`
-- When non-null, `JSON.parse()` the return value — it is a string, not an object
+- Returns `null` when no results are found — always check before accessing properties
+- Return values are already typed objects — do NOT call `JSON.parse()`

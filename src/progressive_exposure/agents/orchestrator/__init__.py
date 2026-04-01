@@ -89,25 +89,26 @@ QuickJS has NO built-in HTTP capability. There is no global `fetch()`, no `XMLHt
 
 To access financial data, you MUST use the provided plugins:
 ```javascript
-import * as indices from 'indices';
-import * as stocks from 'stocks';
-import * as portfolios from 'portfolios';
+import * as indices from "indices";
+import * as stocks from "stocks";
+import * as portfolios from "portfolios";
 
-const allIndicesRaw = indices.get();                  // all indices (string | null)
-const nasdaqRaw = indices.get("IXIC");                // single index (string | null)
-const allStocksRaw = stocks.get();                    // all stocks (string | null)
-const appleRaw = stocks.get("AAPL");                  // single stock (string | null)
-const portfolioRaw = portfolios.get();                // all holdings (string | null)
+const allIndices = indices.get();                     // Array | null
+const nasdaq = indices.get("IXIC");                   // Object | null
+const allStocks = stocks.get();                       // Array | null
+const apple = stocks.get("AAPL");                     // Object | null
+const portfolio = portfolios.get();                   // Object | null
 
-// Always check for null before parsing
-if (allIndicesRaw !== null) {{
-  const allIndices = JSON.parse(allIndicesRaw);
+// Always check for null before accessing properties
+if (nasdaq !== null) {{
+  const changePercent = nasdaq.change_percent;
 }}
 ```
 
 **NEVER use `fetch()`, `http`, or any URL-based API call.** They do not exist.
 You MUST use the plugin imports above to retrieve data.
-All plugin `.get()` methods return `null` when no results are found — always check before calling `JSON.parse()`.
+All plugin `.get()` methods return `null` when no results are found — always check before accessing properties.
+Plugin return values are already typed objects — do NOT call `JSON.parse()` on them.
 
 ## CRITICAL — Handler Function Format
 All generated code MUST be wrapped in a `handler` function that is exported. The remote execution
@@ -115,14 +116,14 @@ environment calls this function at runtime. Code that is not wrapped in a handle
 
 **Required structure:**
 ```javascript
-import * as indices from 'indices';
+import * as indices from "indices";
 
 function handler(e) {{
-  const raw = indices.get("DJI");
-  if (raw !== null) {{
-    return {{ result: JSON.parse(raw) }};
+  const dji = indices.get("DJI");
+  if (dji !== null) {{
+    return dji;
   }}
-  return {{ result: null }};
+  return null;
 }}
 
 export {{ handler }};
@@ -134,6 +135,7 @@ Rules:
 - The handler MUST be exported via `export {{ handler }};` as the last line
 - Do NOT place any executable code outside the handler function
 - Do NOT use `console.log()` for output — return data from the handler instead
+- **NEVER use single quotes.** All strings MUST use double quotes (e.g., `"AAPL"`, not `'AAPL'`)
 
 ## Code Guidelines — QuickJS Compliance
 All generated code MUST be QuickJS-compliant. QuickJS supports ES2023 syntax but is NOT Node.js.
@@ -146,11 +148,11 @@ All generated code MUST be QuickJS-compliant. QuickJS supports ES2023 syntax but
 - Standard built-in objects: `JSON`, `Math`, `Date`, `RegExp`, `Map`, `Set`, `Array`, `Object`, `String`, `Number`, `BigInt`, `Symbol`, `Proxy`, `Reflect`
 - `for...of`, `for...in`, generators, iterators
 - Classes, optional chaining (`?.`), nullish coalescing (`??`)
-- Plugins provided by the remote API via `import * as <name> from '<name>'` (see Plugins section below)
+- Plugins provided by the remote API via `import * as <name> from "<name>"` (see Plugins section below)
 
 ### NOT Supported (do NOT use)
 - **`fetch()` — does NOT exist.** Use the `indices`, `stocks`, and `portfolios` plugins instead
-- `require()` — use `import * as <name> from '<name>'` for plugins only
+- `require()` — use `import * as <name> from "<name>"` for plugins only
 - Node.js built-in modules (`fs`, `path`, `http`, `https`, `crypto`, `url`, `child_process`, etc.)
 - `XMLHttpRequest` or any other network APIs
 - URL-based API calls of any kind — use plugins
@@ -162,7 +164,7 @@ All generated code MUST be QuickJS-compliant. QuickJS supports ES2023 syntax but
 ## Plugins
 
 The remote QuickJS environment provides dependency-injected plugins for functionality not natively available.
-Import them using ES module syntax: `import * as <name> from '<name>'`
+Import them using ES module syntax: `import * as <name> from "<name>"`
 
 {plugin_docs}
 

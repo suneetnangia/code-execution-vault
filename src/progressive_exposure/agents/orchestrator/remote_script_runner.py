@@ -31,6 +31,13 @@ def remote_script_runner(code: str) -> str:
     url = f"{base_url}/execute"
 
     payload = json.dumps({"code": code}).encode("utf-8")
+
+    print(f"--- Remote execution request ---", flush=True)
+    print(f"POST {url}", flush=True)
+    print(f"Content-Type: application/json", flush=True)
+    print(f"Payload:\n{payload.decode('utf-8')}", flush=True)
+    print(f"--- End request ---", flush=True)
+
     req = urllib.request.Request(
         url,
         data=payload,
@@ -40,14 +47,22 @@ def remote_script_runner(code: str) -> str:
 
     try:
         with urllib.request.urlopen(req, timeout=REQUEST_TIMEOUT) as resp:
-            body = json.loads(resp.read().decode("utf-8"))
+            raw_response = resp.read().decode("utf-8")
+            print(f"--- Remote execution response (HTTP {resp.status}) ---", flush=True)
+            print(raw_response, flush=True)
+            print(f"--- End response ---", flush=True)
+            body = json.loads(raw_response)
             result = body.get("result", body.get("output"))
             if result is None:
                 return "(no output)"
             return result if isinstance(result, str) else json.dumps(result)
     except urllib.error.HTTPError as e:
+        error_body = e.read().decode("utf-8")
+        print(f"--- Remote execution error (HTTP {e.code}) ---", flush=True)
+        print(error_body, flush=True)
+        print(f"--- End error ---", flush=True)
         try:
-            detail = json.loads(e.read().decode("utf-8")).get("detail", e.reason)
+            detail = json.loads(error_body).get("detail", e.reason)
         except Exception:
             detail = e.reason
         return f"Error: Remote execution failed (HTTP {e.code}): {detail}"

@@ -172,14 +172,14 @@ After collecting all data from previous steps, write a final `run-python-code` i
 **You MUST use plugins to access data — there is no HTTP or URL-based API access in QuickJS:**
 
 ```javascript
-import * as indices from 'indices';
+import * as indices from "indices";
 
 function handler(e) {
-  const raw = indices.get();
-  if (raw !== null) {
-    return { result: JSON.parse(raw) };
+  const data = indices.get();
+  if (data !== null) {
+    return data;
   }
-  return { result: null };
+  return null;
 }
 
 export { handler };
@@ -187,28 +187,28 @@ export { handler };
 
 Other plugins follow the same pattern:
 ```javascript
-import * as stocks from 'stocks';
+import * as stocks from "stocks";
 
 function handler(e) {
-  const raw = stocks.get("AAPL");
-  if (raw !== null) {
-    return { result: JSON.parse(raw) };
+  const stock = stocks.get("AAPL");
+  if (stock !== null) {
+    return stock;
   }
-  return { result: null };
+  return null;
 }
 
 export { handler };
 ```
 
 ```javascript
-import * as portfolios from 'portfolios';
+import * as portfolios from "portfolios";
 
 function handler(e) {
-  const raw = portfolios.get();
-  if (raw !== null) {
-    return { result: JSON.parse(raw) };
+  const portfolio = portfolios.get();
+  if (portfolio !== null) {
+    return portfolio;
   }
-  return { result: null };
+  return null;
 }
 
 export { handler };
