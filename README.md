@@ -257,3 +257,8 @@ poe typecheck       # Type check with pyright
 poe test            # Run tests with pytest
 poe check           # Run all of the above
 ```
+
+## Next Steps
+
+- **Scalable skill configuration** — Find a more robust way to provide configuration values (e.g., API base URLs, feature flags) to skill definitions at runtime, rather than relying on string substitution or hardcoded defaults scattered across SKILL.md files.
+- **Formal plugin specification** — Replace the current free-form Markdown plugin docs with a structured, machine-readable spec (similar to OpenAPI) that can be validated, versioned, and used to auto-generate the plugin documentation injected into skill content.
